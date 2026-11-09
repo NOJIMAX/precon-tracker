@@ -1,0 +1,28 @@
+# 毎朝 6:00（日本時間）の価格更新を GitHub Actions で実行する場合の設定。
+# Vercel Cron と二重に動かさないよう、リポジトリ変数 USE_GITHUB_ACTIONS_CRON=true のときだけ動きます。
+# 晴れる屋の自動取得を有効にする（許可を得た）場合など、Vercel の実行時間上限（5分）を超える処理向けです。
+name: daily-price-update
+on:
+  schedule:
+    - cron: "0 21 * * *" # UTC 21:00 = JST 6:00
+  workflow_dispatch:
+concurrency:
+  group: daily-price-update
+  cancel-in-progress: false
+jobs:
+  update:
+    if: ${{ vars.USE_GITHUB_ACTIONS_CRON == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run job:daily
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          HARERUYA_AUTO_FETCH: ${{ vars.HARERUYA_AUTO_FETCH }}
+          JOB_TIME_BUDGET_MS: "10200000"

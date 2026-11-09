@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+:root { color-scheme: light; }
+body { background: #f6f7f8; color: #111827; font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", system-ui, sans-serif; }
+table { border-collapse: separate; border-spacing: 0; }
